@@ -11,5 +11,5 @@ else
   cd DIR || exit
 fi
 
-make -C /usr/src/"$(uname -r)"/ M="$(pwd)"
+make -C /usr/src/linux-headers-"$(uname -r)"/ M="$(pwd)"
 make load
