@@ -100,4 +100,14 @@ Again it is possible to remove the device driver and the object for it from the 
 
 Now a picture will be given of how the driver should function. Here you can see the kernel messages with the command `dmesg`. To see the output of the character device itself you can just run `cat /dev/AALDERIN-DRIVER`.
 
-![Image functioning device driver](https://imgur.com/a/UBRSzfg)
+```shell
+...
+[ 2179.805054] aaldering_module: loading out-of-tree module taints kernel.
+[ 2179.805324] [AALDERING DRIVER - MESSAGE] - Initialization started...
+[ 2179.805330] [AALDERING DRIVER - MESSAGE] - The function 'register_device()' is called.
+[ 2179.805341] [AALDERING DRIVER - MESSAGE] - Registered character device with major number = 510 and minor numbers 0 till 255.
+[ 2274.958355] [AALDERING DRIVER - MESSAGE] - Device file is read at offset = 0, read bytes count = 131072.
+[ 2274.959231] [AALDERING DRIVER - MESSAGE] - Device file is read at offset = 46, read bytes count = 131072.
+bobaa@armpi:~$../DRIVER_LINUX $ cat /dev/AALDERING-DRIVER
+Hello to the BOBAA driver from kernel mode!
+```
