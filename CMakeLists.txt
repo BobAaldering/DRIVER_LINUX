@@ -34,7 +34,7 @@ include_directories(
 )
 
 set(DRIVER_FILE main.ko device_file.ko) # Set the '*.ko' files.
-set(KBUILD_CMD $(MAKE) -C ${KERNELHEADERS_DIR} modules M=${CMAKE_CURRENT_BINARY_DIR}) # Execute the build command of 'make'.
+set(KBUILD_CMD $(MAKE) -C ${KERNELHEADERS_DIR} M=${CMAKE_CURRENT_BINARY_DIR} modules) # Execute the build command of 'make'.
 
 FILE(WRITE ${CMAKE_CURRENT_SOURCE_DIR}/Kbuild "obj-m := main.o device_file.o") # Let CMake generate the 'Kbuild' file.
 
@@ -45,5 +45,3 @@ add_custom_command(OUTPUT ${DRIVER_FILE}
         DEPENDS main.c ./src/device_file.c VERBATIM) # Dependencies.
 
 add_custom_target(driver ALL DEPENDS ${DRIVER_FILE}) # Add all the dependencies.
-
-add_library(DRIVER_DUMMY_TARGET main.c src/device_file.c) # Create a dummy target. Pay attention, I let CMake only generate a 'Kbuild file'.
