@@ -30,11 +30,6 @@ include_directories(
         ${KERNELHEADERS_DIR}/include
         )
 
-# Instruct the compiler where to look for the given header files within this project.
-include_directories(
-        ./inc
-        )
-
 set(DRIVER_FILE "${MODULE_NAME}.ko") # Set the name of the '*.ko' file.
 set(KBUILD_CMD $(MAKE) -C ${KERNELHEADERS_DIR} modules M=${CMAKE_CURRENT_BINARY_DIR} src=${CMAKE_CURRENT_SOURCE_DIR}) # Execute the build command of 'make'.
 
@@ -44,7 +39,7 @@ FILE(WRITE ${CMAKE_CURRENT_SOURCE_DIR}/Kbuild "${MODULE_NAME}-objs := main.o dev
 add_custom_command(OUTPUT ${DRIVER_FILE}
         COMMAND ${KBUILD_CMD}
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} # Current working directory.
-        DEPENDS main.c ./src/device_file.c VERBATIM # Dependencies.
+        DEPENDS main.c device_file.c VERBATIM # Dependencies.
         )
 
 # This target is used to build the actual device driver (and the '*ko' file).
@@ -65,5 +60,5 @@ add_custom_target(unload
 # Target used for CLion, to have all the nice features of the IDE. Do not use this target for building, because it will not compile.
 add_library(dummy_target
         main.c # The 'main' file of the project.
-        ./src/device_file.c # External source file.
+        device_file.c # External source file.
         )
