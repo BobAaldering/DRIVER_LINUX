@@ -1,7 +1,7 @@
 #include <linux/init.h> // Include the 'linux/init' header. It contains for instance module loading and unloading functionalities.
 #include <linux/module.h> // Include the 'linux/module' header. It contains for instance general module information.
 
-#include "inc/device_file.h" // Include the 'device_file' header.
+#include "device_file.h" // Include the 'device_file' header.
 
 /* ~~~ MODULE INFORMATION ~~~ */
 

@@ -1,4 +1,4 @@
-#include "../inc/device_file.h"
+#include "device_file.h"
 
 #include <linux/fs.h> // Include the 'linux/fs' header. It contains functionalities for file access.
 #include <linux/kernel.h> // Include the 'linux/kernel' header. It contains for example an implementation of 'printk'.

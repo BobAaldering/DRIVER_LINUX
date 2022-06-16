@@ -23,6 +23,11 @@ find_path(
 message(STATUS "Kernel release: ${KERNEL_RELEASE}") # Message to show the kernel release.
 message(STATUS "Kernel headers: ${KERNELHEADERS_DIR}") # Message to show the directory with kernel headers/modules.
 
+# Instruct the compiler where to look for the given header files within this project.
+include_directories(
+        ./inc
+)
+
 # Include the kernel directories with 'CMake'.
 include_directories(
         ${KERNELHEADERS_DIR}/include
@@ -37,7 +42,7 @@ FILE(WRITE ${CMAKE_CURRENT_SOURCE_DIR}/Kbuild "obj-m := main.o device_file.o") #
 add_custom_command(OUTPUT ${DRIVER_FILE}
         COMMAND ${KBUILD_CMD}
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} # Current working directory.
-        DEPENDS main.c src/device_file.c VERBATIM) # Dependencies.
+        DEPENDS main.c ./src/device_file.c VERBATIM) # Dependencies.
 
 add_custom_target(driver ALL DEPENDS ${DRIVER_FILE}) # Add all the dependencies.
 
