@@ -4,6 +4,8 @@ project(DRIVER_LINUX VERSION 1.0.0 LANGUAGES C) # The specification of this proj
 set(CMAKE_C_STANDARD 11) # Set the C language standard. We are using C11.
 set(CMAKE_C_STANDARD_REQUIRED ON) # Use the C standards.
 
+set(TARGET_MODULE aaldering-driver)
+
 add_definitions(-D__KERNEL__ -DMODULE) # Add a definition for kernel modules.
 
 # Execute this command, to find your current Linux kernel version.
@@ -33,15 +35,26 @@ include_directories(
         ${KERNELHEADERS_DIR}/include
 )
 
-set(DRIVER_FILE main.ko device_file.ko) # Set the '*.ko' files.
+set(DRIVER_FILE ${TARGET_MODULE}.ko) # Set the '*.ko' files.
 set(KBUILD_CMD $(MAKE) -C ${KERNELHEADERS_DIR} M=${CMAKE_CURRENT_BINARY_DIR} modules) # Execute the build command of 'make'.
 
-FILE(WRITE ${CMAKE_CURRENT_SOURCE_DIR}/Kbuild "obj-m := main.o device_file.o") # Let CMake generate the 'Kbuild' file.
+FILE(WRITE ${CMAKE_CURRENT_SOURCE_DIR}/Kbuild "${TARGET_MODULE}-objs := main.o device_file.o obj-m := ${TARGET_MODULE}.o") # Let CMake generate the 'Kbuild' file.
 
 # This is my custom command to make sure that all the dependencies are there.
 add_custom_command(OUTPUT ${DRIVER_FILE}
         COMMAND ${KBUILD_CMD}
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} # Current working directory.
-        DEPENDS main.c ./src/device_file.c VERBATIM) # Dependencies.
+        DEPENDS main.c ./src/device_file.c VERBATIM # Dependencies.
+        )
 
-add_custom_target(driver ALL DEPENDS ${DRIVER_FILE}) # Add all the dependencies.
+add_custom_target(driver
+        ALL DEPENDS ${DRIVER_FILE} # Add all the dependencies.
+        )
+
+add_custom_target(load
+        COMMAND insmod ./${TARGET_MODULE}.ko
+        )
+
+add_custom_target(unload
+        COMMAND rmmod ./${TARGET_MODULE}.ko
+        )
