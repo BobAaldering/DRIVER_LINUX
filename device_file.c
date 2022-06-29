@@ -6,6 +6,8 @@
 #include <linux/module.h> // Include the 'linux/module' header. It contains for instance general module information.
 #include <linux/cdev.h> // Include the 'linux/cdev' header. It contains character device functionalities.
 #include <linux/uaccess.h> // Include the 'linux/uaccess' header. It contains 'copy to user' functionalities.
+#include <linux/string.h> // Include the 'linux/string' header. It contains various string manipulation functionalities.
+#include <linux/delay.h> // Include the 'linux/delay' header. It contains delay and sleep functionalities.
 
 #include "gpio_communicator.h"
 
@@ -38,7 +40,20 @@ static ssize_t device_file_read(struct file *file_ptr, char __user *user_buffer,
 }
 
 static ssize_t device_file_write(struct file *file_ptr, const char __user *user_buffer, size_t count, loff_t *position) {
-    long print_value;
+    char* option_to_show;
+    char* option_provided_by_user;
+
+    long value_provided_by_option;
+
+    bool has_complete_option;
+
+    long current_counter_number;
+
+    provided_option_checker_t option_checker = {
+        .is_display_option = false,
+        .is_countdown_option = false,
+        .is_countup_option = false
+    };
 
     printk(KERN_NOTICE "[AALDERING DRIVER - MESSAGE] - Trying to write device file at offset = %i, read bytes count = %u.\n", (int) *position, (unsigned int) count); // Print a kernel message, it will show up with the 'dmesg' command.
 
@@ -56,10 +71,57 @@ static ssize_t device_file_write(struct file *file_ptr, const char __user *user_
 
     *position += count; // New value of 'count'.
 
-    if (kstrtol(g_s_kernel_mode_buffer, 16, &print_value) == 0)
-        write_byte_shift_register(print_value);
-    else
+    option_provided_by_user = kstrdup(g_s_kernel_mode_buffer, GFP_KERNEL);
 
+    has_complete_option = false;
+
+    while ((option_to_show = strsep(&option_provided_by_user, " ")) != NULL && !has_complete_option) {
+        if (strcmp(option_to_show, "--display") == 0)
+            option_checker.is_display_option = true;
+        else if (strcmp(option_to_show, "--countdown") == 0)
+            option_checker.is_countdown_option = true;
+        else if (strcmp(option_to_show, "--countup") == 0)
+            option_checker.is_countup_option = true;
+        else if (strstr(option_to_show, "0x") != NULL && strlen(option_to_show) >= 3) {
+            if (kstrtol(&option_to_show[2], 16, &value_provided_by_option) != 0)
+                printk(KERN_NOTICE "[AALDERING DRIVER - MESSAGE] - Error while converting the specific argument for the specified option!\n"); // Print a kernel message, it will show up with the 'dmesg' command.
+            else
+                has_complete_option = true;
+        }
+    }
+
+    if (option_checker.is_display_option) {
+        if (value_provided_by_option >= 0x0 && value_provided_by_option <= 0xF)
+            write_byte_shift_register(value_provided_by_option);
+        else
+            printk(KERN_NOTICE "[AALDERING DRIVER - MESSAGE] - Argument provided with option '--display' with value '0x%lX' is not supported!\n", value_provided_by_option); // Print a kernel message, it will show up with the 'dmesg' command.
+    }
+    else if (option_checker.is_countdown_option) {
+        if (value_provided_by_option >= 0x0 && value_provided_by_option <= 0xF) {
+            current_counter_number = value_provided_by_option;
+
+            for (; current_counter_number >= 0x0; current_counter_number--) {
+                write_byte_shift_register(current_counter_number);
+                ssleep(1);
+            }
+        }
+        else
+            printk(KERN_NOTICE "[AALDERING DRIVER - MESSAGE] - Argument provided with option '--countdown' with value '0x%lX' is not supported!\n", value_provided_by_option); // Print a kernel message, it will show up with the 'dmesg' command.
+    }
+    else if (option_checker.is_countup_option) {
+        if (value_provided_by_option >= 0x0 && value_provided_by_option <= 0xF) {
+            current_counter_number = value_provided_by_option;
+
+            for (; current_counter_number <= 0xF; current_counter_number++) {
+                write_byte_shift_register(current_counter_number);
+                ssleep(1);
+            }
+        }
+        else
+            printk(KERN_NOTICE "[AALDERING DRIVER - MESSAGE] - Argument provided with option '--countup' with value '0x%lX' is not supported!\n", value_provided_by_option); // Print a kernel message, it will show up with the 'dmesg' command.
+    }
+    else
+        printk(KERN_NOTICE "[AALDERING DRIVER - MESSAGE] - No option found to display on the seven segment display!\n"); // Print a kernel message, it will show up with the 'dmesg' command.
 
     return (ssize_t) count; // Return the value of 'count'.
 }

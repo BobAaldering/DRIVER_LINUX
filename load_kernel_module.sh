@@ -42,7 +42,8 @@ if [ "${value}" = "load" ]; then
 elif [ "${value}" = "unload" ]; then
   sudo rm /dev/AALDERING-DRIVER # We are unloading, remove also the driver (just a file).
   sudo make unload # Make the target 'unload'.
-  make driver clean # Clean the driver target.
+
+  make clean # Clean all the targets.
 
   echo "[KERNEL MODULES] - Unloaded the device driver!" # Message that the device driver is unloaded.
 else

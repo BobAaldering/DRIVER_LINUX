@@ -35,6 +35,12 @@ static const uint8_t digit_representation_seven_segment[] = {
         0b01110000 // The digit 'F'.
 };
 
+typedef struct provided_option_checker {
+    bool is_display_option;
+    bool is_countdown_option;
+    bool is_countup_option;
+} provided_option_checker_t;
+
 void initialize_gpio_shift_register(void);
 void de_initialize_gpio_shift_register(void);
 

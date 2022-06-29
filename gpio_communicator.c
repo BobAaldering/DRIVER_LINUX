@@ -6,12 +6,12 @@
 
 void initialize_gpio_shift_register(void) {
     if (gpio_is_valid(SHIFT_REG_DATA_PIN) == false || gpio_is_valid(SHIFT_REG_CLOCK_PIN) == false || gpio_is_valid(SHIFT_REG_LATCH_PIN) == false) {
-        printk(KERN_NOTICE "[AALDERING DRIVER - MESSAGE] - GPIO for the shift register is not valid!");
+        printk(KERN_NOTICE "[AALDERING DRIVER - MESSAGE] - GPIO for the shift register is not valid!\n");
         return;
     }
 
     if (gpio_request(SHIFT_REG_DATA_PIN, "SHIFT_REG_DATA_PIN") < 0 || gpio_request(SHIFT_REG_CLOCK_PIN, "SHIFT_REG_CLOCK_PIN") < 0 || gpio_request(SHIFT_REG_LATCH_PIN, "SHIFT_REG_DATA_PIN") < 0) {
-        printk(KERN_NOTICE "[AALDERING DRIVER - MESSAGE] - GPIO for the shift register cannot be requested!");
+        printk(KERN_NOTICE "[AALDERING DRIVER - MESSAGE] - GPIO for the shift register cannot be requested!\n");
         return;
     }
 
@@ -27,19 +27,19 @@ void de_initialize_gpio_shift_register(void) {
 }
 
 void update_output_shift_register(void) {
-    ndelay(1000);
+    ndelay(100);
     gpio_set_value(SHIFT_REG_LATCH_PIN, HIGH_OUTPUT);
 
-    ndelay(1000);
+    ndelay(100);
     gpio_set_value(SHIFT_REG_LATCH_PIN, LOW_OUTPUT);
 }
 
 void write_bit_shift_register(bool bit_value) {
     gpio_set_value(SHIFT_REG_DATA_PIN, bit_value ? HIGH_OUTPUT : LOW_OUTPUT);
-    ndelay(1000);
+    ndelay(100);
 
     gpio_set_value(SHIFT_REG_CLOCK_PIN, HIGH_OUTPUT);
-    ndelay(1000);
+    ndelay(100);
     gpio_set_value(SHIFT_REG_CLOCK_PIN, LOW_OUTPUT);
 }
 
@@ -48,7 +48,7 @@ void write_byte_shift_register(int specific_digit) {
 
     for (; bit_number < BIT_SIZE; bit_number++) {
         write_bit_shift_register(digit_representation_seven_segment[specific_digit] & (1 << bit_number));
-        ndelay(1);
+        ndelay(100);
     }
 
     update_output_shift_register();
