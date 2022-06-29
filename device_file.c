@@ -12,15 +12,15 @@
 static char g_s_kernel_mode_buffer[BUFFER_SIZE_READ_WRITE] = ""; // String to show from kernel mode, pay attention to the null character.
 static const ssize_t g_s_kernel_mode_size = sizeof(g_s_kernel_mode_buffer); // The size of the string, to show from kernel mode.
 
-/* ~~~ READ DEVICE FILE FUNCTION ~~~ */
+/* ~~~ READ/WRITE DEVICE FILE FUNCTION ~~~ */
 
 // This function reads the file from user space.
 static ssize_t device_file_read(struct file *file_ptr, char __user *user_buffer, size_t count, loff_t *position) {
-    printk(KERN_NOTICE "[AALDERING DRIVER - MESSAGE] - Device file is read at offset = %i, read bytes count = %u.\n", (int) *position, (unsigned int) count); // Print a kernel message, it will show up with the 'dmesg' command.
+    printk(KERN_NOTICE "[AALDERING DRIVER - MESSAGE] - Trying to read device file at offset = %i, read bytes count = %u.\n", (int) *position, (unsigned int) count); // Print a kernel message, it will show up with the 'dmesg' command.
 
-    // Check the position from the buffer in user space.
+    // Check the position from the buffer.
     if (*position >= g_s_kernel_mode_size)
-        return 0; // Error has happened, return zero.
+        return 0; // No data is read from the buffer, return a value of zero. Linux will not try read the buffer again (see page 66 of the book 'LINUX DEVICE DRIVERS').
 
     // Check the current position.
     if (*position + count > g_s_kernel_mode_size)
@@ -28,7 +28,7 @@ static ssize_t device_file_read(struct file *file_ptr, char __user *user_buffer,
 
     // Check if copying information from kernel space to user space succeeded.
     if (copy_to_user(user_buffer, g_s_kernel_mode_buffer + *position, count) != 0)
-        return -EFAULT; // Error has happened while copying.
+        return -EFAULT; // Error code for providing a bad address.
 
     *position += count; // New value of 'count'.
 
@@ -36,20 +36,23 @@ static ssize_t device_file_read(struct file *file_ptr, char __user *user_buffer,
 }
 
 static ssize_t device_file_write(struct file *file_ptr, const char __user *user_buffer, size_t count, loff_t *position) {
-    printk(KERN_NOTICE "[AALDERING DRIVER - MESSAGE] - Device file is written at offset = %i, read bytes count = %u.\n", (int) *position, (unsigned int) count); // Print a kernel message, it will show up with the 'dmesg' command.
+    printk(KERN_NOTICE "[AALDERING DRIVER - MESSAGE] - Trying to write device file at offset = %i, read bytes count = %u.\n", (int) *position, (unsigned int) count); // Print a kernel message, it will show up with the 'dmesg' command.
 
+    // Check the position from the buffer.
     if (*position >= g_s_kernel_mode_size)
-        return 0;
+        return -ENOSPC; // When the user exceeded the buffer size, a value of zero can be returned. But Linux tries to write data into the buffer again. This results in an infinite operation, so return an error in this case (see page 68 of the book 'LINUX DEVICE DRIVERS').
 
+    // Check the current position.
     if (*position + count > g_s_kernel_mode_size)
-        count = g_s_kernel_mode_size - *position;
+        count = g_s_kernel_mode_size - *position; // The new value of 'count'.
 
+    // Check if copying information from user space to kernel space succeeded.
     if (copy_from_user(g_s_kernel_mode_buffer + *position, user_buffer, count) != 0)
-        return -EFAULT;
+        return -EFAULT; // Error code for providing a bad address.
 
-    *position += count;
+    *position += count; // New value of 'count'.
 
-    return (ssize_t) count;
+    return (ssize_t) count; // Return the value of 'count'.
 }
 
 /* ~~~ FILE OPERATIONS STRUCTURE ~~~ */

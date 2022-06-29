@@ -53,8 +53,13 @@ In order to be able to 'install' the driver on the Linux system I will clearly s
     ```shell
     ../DRIVER_LINUX/cmake-build:~$ sudo mknod /dev/AALDERING-DRIVER c 510 0
     ```
-8. Now a driver of its own has been added to your Linux operating system! Check this with:
+8. You have to change the access right of the driver with the following command:
+   ```shell
+   ../DRIVER_LINUX/cmake-build:~$ sudo chmod 777 /dev/AALDERING-DRIVER
+   ```
+9. Now a driver of its own has been added to your Linux operating system! Check this with:
     ```shell
+    ../DRIVER_LINUX/cmake-build:~$ echo "TEST" > /dev/AALDERING-DRIVER
     ../DRIVER_LINUX/cmake-build:~$ cat /dev/AALDERING-DRIVER
     ```
 
@@ -71,17 +76,14 @@ Sometimes you also want to remove the module from the kernel, as well as the dev
 Now that the module has been removed from the kernel, as well as the device driver itself, it is possible to go through the above steps again.
 
 **Complete with the `shell` script:**
-1. The [shell](compile_kernel_module.sh) script makes the above steps of building a device driver easier. One argument is very important to the script, namely `load`. This adds a module to the kernel. All other arguments ensure that it is removed if possible.
+1. The [shell](load_kernel_module.sh) script makes the above steps of building a device driver easier. One argument is very important to the script, namely `load`. This adds a module to the kernel. All other arguments ensure that it is removed if possible.
     ```shell
-    ../DRIVER_LINUX/cmake-build:~$ sudo sh compile_kernel_module.sh load
+    ../DRIVER_LINUX/cmake-build:~$ sudo sh load_kernel_module.sh load
     ```
-2. Now your major number of the device driver is immediately visible, as well as the module. Check whether these are present. You can simply recognize them by `AALDERING-DRIVER` and `aaldering-module`.
-3. With the major device number you still have to actually add the module as a character device file. Then you just do it like this:
-    ```shell
-    ../DRIVER_LINUX/cmake-build:~$ sudo mknod /dev/AALDERING-MODULE c 510 0
-    ```
+2. Now your driver is build and completely inserted into the kernel! How easy is that!
 4. Now check if the driver is actually available, and if you see output.
     ```shell
+    ../DRIVER_LINUX/cmake-build:~$ echo "TEST" > /dev/AALDERING-DRIVER
     ../DRIVER_LINUX/cmake-build:~$ cat /dev/AALDERING-DRIVER
     ```
 
@@ -89,12 +91,9 @@ Again it is possible to remove the device driver and the object for it from the 
 
 1. Any other argument can now be used for the shell script, except `load`. For clarity, use the `unload` argument. This ensures that the module is removed from the kernel, and you can add a new one in case of changes, for example.
     ```shell
-    ../DRIVER_LINUX/cmake-build:~$ sudo sh compile_kernel_module.sh unload
+    ../DRIVER_LINUX/cmake-build:~$ sudo sh load_kernel_module.sh unload
     ```
-2. Also, now you can remove the device driver very easily (just like above) because it is a regular file.
-    ```shell
-    ../DRIVER_LINUX/cmake-build:~$ sudo rm /dev/AALDERING-DRIVER
-    ```
+2. Now the device driver is completely unloaded from the kernel! Just as easy as loading the device driver!
    
 ## Correct functioning
 
@@ -102,12 +101,13 @@ Now a picture will be given of how the driver should function. Here you can see 
 
 ```shell
 ...
-[ 2179.805054] aaldering_module: loading out-of-tree module taints kernel.
-[ 2179.805324] [AALDERING DRIVER - MESSAGE] - Initialization started...
-[ 2179.805330] [AALDERING DRIVER - MESSAGE] - The function 'register_device()' is called.
-[ 2179.805341] [AALDERING DRIVER - MESSAGE] - Registered character device with major number = 510 and minor numbers 0 till 255.
-[ 2274.958355] [AALDERING DRIVER - MESSAGE] - Device file is read at offset = 0, read bytes count = 131072.
-[ 2274.959231] [AALDERING DRIVER - MESSAGE] - Device file is read at offset = 46, read bytes count = 131072.
+[ 3291.010622] [AALDERING DRIVER - MESSAGE] - Initialization started...
+[ 3291.010633] [AALDERING DRIVER - MESSAGE] - The function 'register_device()' is called.
+[ 3291.010642] [AALDERING DRIVER - MESSAGE] - Registered character device with major number = 510 and minor numbers 0 till 255.
+[ 3307.847297] [AALDERING DRIVER - MESSAGE] - Trying to write device file at offset = 0, read bytes count = 5.
+[ 3316.149036] [AALDERING DRIVER - MESSAGE] - Trying to read device file at offset = 0, read bytes count = 131072.
+[ 3316.149125] [AALDERING DRIVER - MESSAGE] - Trying to read device file at offset = 50, read bytes count = 131072.
+bobaa@armpi:~$../DRIVER_LINUX $ echo "TEST" > /dev/AALDERING-DRIVER
 bobaa@armpi:~$../DRIVER_LINUX $ cat /dev/AALDERING-DRIVER
-Hello to the BOBAA driver from kernel mode!
+TEST
 ```
