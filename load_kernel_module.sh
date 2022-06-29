@@ -29,21 +29,22 @@ value=$1 # Get the first argument passed to this script.
 if [ "${value}" = "load" ]; then
   sudo make load # Make the target 'load'.
 
-  module_information=$(grep aaldering_module /proc/modules)
+  module_information=$(grep aaldering_module /proc/modules) # Check if the module is within the kernel.
   device_number=$(grep AALDERING-DRIVER /proc/devices) # Check if the device driver is there.
 
-  echo "[KERNEL MODULES] - Information of the specific module: $module_information"
-  echo "[KERNEL MODULES] - Information of the specific device: $device_number"
+  echo "[KERNEL MODULES] - Information of the specific module: $module_information" # Print the kernel module.
+  echo "[KERNEL MODULES] - Information of the specific device: $device_number" # Print the device driver information.
 
-  sudo mknod /dev/AALDERING-DRIVER c "${device_number%% *}" 0
-  sudo chmod 777 /dev/AALDERING-DRIVER
+  sudo mknod /dev/AALDERING-DRIVER c "${device_number%% *}" 0 # Create a node, so you can access the device driver.
+  sudo chmod 777 /dev/AALDERING-DRIVER # Change the access rights.
 
-  echo "[KERNEL MODULES] - Loaded the device driver!"
+  echo "[KERNEL MODULES] - Loaded the device driver!" # Message that the device driver is loaded.
 elif [ "${value}" = "unload" ]; then
   sudo rm /dev/AALDERING-DRIVER # We are unloading, remove also the driver (just a file).
   sudo make unload # Make the target 'unload'.
+  make driver clean # Clean the driver target.
 
-  echo "[KERNEL MODULES] - Unloaded the device driver!"
+  echo "[KERNEL MODULES] - Unloaded the device driver!" # Message that the device driver is unloaded.
 else
-  echo "[KERNEL MODULES] - No target specified, use as argument 'load' or 'unload' for loading/unloading the driver!"
+  echo "[KERNEL MODULES] - No target specified, use as argument 'load' or 'unload' for loading/unloading the driver!" # No target specified.
 fi

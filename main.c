@@ -2,6 +2,7 @@
 #include <linux/module.h> // Include the 'linux/module' header. It contains for instance general module information.
 
 #include "device_file.h" // Include the 'device_file' header.
+#include "gpio_communicator.h"
 
 /* ~~~ MODULE INFORMATION ~~~ */
 
@@ -15,6 +16,8 @@ MODULE_AUTHOR("Aaldering, Bob"); // The author of the module.
 static int aaldering_driver_init(void) {
     printk(KERN_NOTICE "[AALDERING DRIVER - MESSAGE] - Initialization started...\n"); // Print a kernel message, it will show up with the 'dmesg' command.
 
+    initialize_gpio_shift_register();
+
     return register_device(); // Return the device number.
 }
 
@@ -23,6 +26,9 @@ static int aaldering_driver_init(void) {
 // This function de-initializes the 'aaldering_driver'.
 static void aaldering_driver_exit(void) {
     printk(KERN_NOTICE "[AALDERING DRIVER - MESSAGE] - Exiting...\n"); // Print a kernel message, it will show up with the 'dmesg' command.
+
+    de_initialize_gpio_shift_register();
+
     unregister_device(); // Unregister the device.
 }
 

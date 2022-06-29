@@ -33,7 +33,7 @@ include_directories(
 set(DRIVER_FILE "${MODULE_NAME}.ko") # Set the name of the '*.ko' file.
 set(KBUILD_CMD $(MAKE) -C ${KERNELHEADERS_DIR} modules M=${CMAKE_CURRENT_BINARY_DIR} src=${CMAKE_CURRENT_SOURCE_DIR}) # Execute the build command of 'make'.
 
-FILE(WRITE ${CMAKE_CURRENT_SOURCE_DIR}/Kbuild "${MODULE_NAME}-objs := main.o device_file.o\n obj-m := ${MODULE_NAME}.o") # Let CMake generate the 'Kbuild' file.
+FILE(WRITE ${CMAKE_CURRENT_SOURCE_DIR}/Kbuild "${MODULE_NAME}-objs := main.o device_file.o gpio_communicator.o\n obj-m := ${MODULE_NAME}.o") # Let CMake generate the 'Kbuild' file.
 
 # This is my custom command to make sure that all the dependencies are there.
 add_custom_command(OUTPUT ${DRIVER_FILE}
@@ -61,4 +61,5 @@ add_custom_target(unload
 add_library(dummy_target
         main.c # The 'main' file of the project.
         device_file.c # External source file.
+        gpio_communicator.c # External source file.
         )

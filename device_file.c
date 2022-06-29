@@ -7,6 +7,8 @@
 #include <linux/cdev.h> // Include the 'linux/cdev' header. It contains character device functionalities.
 #include <linux/uaccess.h> // Include the 'linux/uaccess' header. It contains 'copy to user' functionalities.
 
+#include "gpio_communicator.h"
+
 #define BUFFER_SIZE_READ_WRITE (50)
 
 static char g_s_kernel_mode_buffer[BUFFER_SIZE_READ_WRITE] = ""; // String to show from kernel mode, pay attention to the null character.
@@ -36,6 +38,8 @@ static ssize_t device_file_read(struct file *file_ptr, char __user *user_buffer,
 }
 
 static ssize_t device_file_write(struct file *file_ptr, const char __user *user_buffer, size_t count, loff_t *position) {
+    long print_value;
+
     printk(KERN_NOTICE "[AALDERING DRIVER - MESSAGE] - Trying to write device file at offset = %i, read bytes count = %u.\n", (int) *position, (unsigned int) count); // Print a kernel message, it will show up with the 'dmesg' command.
 
     // Check the position from the buffer.
@@ -51,6 +55,11 @@ static ssize_t device_file_write(struct file *file_ptr, const char __user *user_
         return -EFAULT; // Error code for providing a bad address.
 
     *position += count; // New value of 'count'.
+
+    if (kstrtol(g_s_kernel_mode_buffer, 16, &print_value) == 0)
+        write_byte_shift_register(print_value);
+    else
+
 
     return (ssize_t) count; // Return the value of 'count'.
 }
