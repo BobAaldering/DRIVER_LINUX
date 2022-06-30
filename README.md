@@ -2,9 +2,15 @@
 
 #### Study on operating systems, creating a device driver.
 
-This project contains a device driver developed for Linux (more specifically a Raspberry Pi). This driver has been rewritten as `AALDERING-DRIVER`. Subsequently, a number of additional functionalities were added to make the driver more complex.
+This project contains a device driver developed for Linux (more specifically a Raspberry Pi). This driver has been rewritten as `AALDERING-DRIVER`, and you can control a seven segment display with it. Subsequently, a number of additional functionalities were added to make the driver more complex.
 
 It is possible to build the modules using `CMake`. For this, this 'README' also provides a further explanation of how this is possible, and how these created modules can be added to the kernel.
+
+The following options are supported to control the seven segment display:
+
+- The `--display` or `-d` option. This will display a hexadecimal number between `0x0` and `0xF`. You can use it as `echo "--display 0xA" > /dev/AALDERING-DRIVER` or `echo "-d 0xA" > /dev/AALDERING-DRIVER`.
+- The `--countup` or `-u` option. This option counts from the number as argument to `0xF`. You can use it as `echo "--countup 0x4" > /dev/AALDERING-DRIVER` or `echo "-u 0x4" > /dev/AALDERING-DRIVER`.
+- The `--countdown` or `-l` option. This option counts from the number as argument to `0x0`. You can use it as `echo "--countdown 0xB" > /dev/AALDERING-DRIVER` or `echo "-l 0xB" > /dev/AALDERING-DRIVER`.
 
 ## Build and execute
 
@@ -59,7 +65,7 @@ In order to be able to 'install' the driver on the Linux system I will clearly s
    ```
 9. Now a driver of its own has been added to your Linux operating system! Check this with:
     ```shell
-    ../DRIVER_LINUX/cmake-build:~$ echo "TEST" > /dev/AALDERING-DRIVER
+    ../DRIVER_LINUX/cmake-build:~$ echo "--display 0xA" > /dev/AALDERING-DRIVER
     ../DRIVER_LINUX/cmake-build:~$ cat /dev/AALDERING-DRIVER
     ```
 
@@ -83,7 +89,7 @@ Now that the module has been removed from the kernel, as well as the device driv
 2. Now your driver is build and completely inserted into the kernel! How easy is that!
 4. Now check if the driver is actually available, and if you see output.
     ```shell
-    ../DRIVER_LINUX/cmake-build:~$ echo "TEST" > /dev/AALDERING-DRIVER
+    ../DRIVER_LINUX/cmake-build:~$ echo "--display 0xA" > /dev/AALDERING-DRIVER
     ../DRIVER_LINUX/cmake-build:~$ cat /dev/AALDERING-DRIVER
     ```
 
@@ -107,7 +113,7 @@ Now a picture will be given of how the driver should function. Here you can see 
 [ 3307.847297] [AALDERING DRIVER - MESSAGE] - Trying to write device file at offset = 0, read bytes count = 5.
 [ 3316.149036] [AALDERING DRIVER - MESSAGE] - Trying to read device file at offset = 0, read bytes count = 131072.
 [ 3316.149125] [AALDERING DRIVER - MESSAGE] - Trying to read device file at offset = 50, read bytes count = 131072.
-bobaa@armpi:~$../DRIVER_LINUX $ echo "TEST" > /dev/AALDERING-DRIVER
+bobaa@armpi:~$../DRIVER_LINUX $ echo "--display 0xA" > /dev/AALDERING-DRIVER
 bobaa@armpi:~$../DRIVER_LINUX $ cat /dev/AALDERING-DRIVER
-TEST
+--display 0xA
 ```

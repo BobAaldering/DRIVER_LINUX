@@ -9,9 +9,10 @@
 #include <linux/string.h> // Include the 'linux/string' header. It contains various string manipulation functionalities.
 #include <linux/delay.h> // Include the 'linux/delay' header. It contains delay and sleep functionalities.
 
-#include "gpio_communicator.h"
+#include "gpio_communicator.h" // Include the 'gpio_communicator' facilities, for working with GPIO.
 
-#define BUFFER_SIZE_READ_WRITE (50)
+#define BUFFER_SIZE_READ_WRITE (50) // Buffer size for reading and writing.
+#define HEX_BASE (16) // The base of a hexadecimal number.
 
 static char g_s_kernel_mode_buffer[BUFFER_SIZE_READ_WRITE] = ""; // String to show from kernel mode, pay attention to the null character.
 static const ssize_t g_s_kernel_mode_size = sizeof(g_s_kernel_mode_buffer); // The size of the string, to show from kernel mode.
@@ -39,16 +40,18 @@ static ssize_t device_file_read(struct file *file_ptr, char __user *user_buffer,
     return (ssize_t) count; // Return the value of 'count'.
 }
 
+// This function writes to the device file. Based on the written value, it shows digits on a seven segment display.
 static ssize_t device_file_write(struct file *file_ptr, const char __user *user_buffer, size_t count, loff_t *position) {
-    char* option_to_show;
-    char* option_provided_by_user;
+    char* option_to_show; // This variable will hold the current option to show, while parsing the user input.
+    char* option_provided_by_user; // This variable holds the current option provided by the user, for instance '--display'.
 
-    long value_provided_by_option;
+    long value_provided_by_option; // The argument (value) provided by an option.
 
-    bool has_complete_option;
+    bool has_complete_option; // This boolean indicates is there is found an option, together with a hexadecimal argument.
 
-    long current_counter_number;
+    long current_counter_number; // Variable for counting up/down based on the specified option.
 
+    // This variable is used for indicating that an option in present. The initial values are 'false'.
     provided_option_checker_t option_checker = {
         .is_display_option = false,
         .is_countdown_option = false,
@@ -71,47 +74,61 @@ static ssize_t device_file_write(struct file *file_ptr, const char __user *user_
 
     *position += count; // New value of 'count'.
 
-    option_provided_by_user = kstrdup(g_s_kernel_mode_buffer, GFP_KERNEL);
+    option_provided_by_user = kstrdup(g_s_kernel_mode_buffer, GFP_KERNEL); // Duplicate the string in the buffer, just written. Allocate memory in kernel for this.
 
-    has_complete_option = false;
+    has_complete_option = false; // There is no complete option yet.
 
+    // Split everything in the buffer 'option_provided_by_user', also check if there is a complete option.
     while ((option_to_show = strsep(&option_provided_by_user, " ")) != NULL && !has_complete_option) {
-        if (strcmp(option_to_show, "--display") == 0)
+        // The option provided is '--display'.
+        if (strcmp(option_to_show, "--display") == 0 || strcmp(option_to_show, "-d") == 0)
             option_checker.is_display_option = true;
-        else if (strcmp(option_to_show, "--countdown") == 0)
+        // The option provided is '--countdown'.
+        else if (strcmp(option_to_show, "--countdown") == 0 || strcmp(option_to_show, "-l") == 0)
             option_checker.is_countdown_option = true;
-        else if (strcmp(option_to_show, "--countup") == 0)
+        // The option provided is '--countup'.
+        else if (strcmp(option_to_show, "--countup") == 0 || strcmp(option_to_show, "-u") == 0)
             option_checker.is_countup_option = true;
+        // Check if we have an argument for the specified option, it must be provided in hexadecimal format, so it starts with '0x...'.
         else if (strstr(option_to_show, "0x") != NULL && strlen(option_to_show) >= 3) {
-            if (kstrtol(&option_to_show[2], 16, &value_provided_by_option) != 0)
+            // Convert the argument to an integer (long).
+            if (kstrtol(&option_to_show[2], HEX_BASE, &value_provided_by_option) != 0)
                 printk(KERN_NOTICE "[AALDERING DRIVER - MESSAGE] - Error while converting the specific argument for the specified option!\n"); // Print a kernel message, it will show up with the 'dmesg' command.
             else
-                has_complete_option = true;
+                has_complete_option = true; // We have an complete option on success.
         }
     }
 
+    // Check if we must execute the '--display' option.
     if (option_checker.is_display_option) {
+        // If we specified argument is within the range to show it on the seven segment display.
         if (value_provided_by_option >= 0x0 && value_provided_by_option <= 0xF)
-            write_byte_shift_register(value_provided_by_option);
+            write_byte_shift_register(value_provided_by_option); // Show the number on the seven segment display.
         else
             printk(KERN_NOTICE "[AALDERING DRIVER - MESSAGE] - Argument provided with option '--display' with value '0x%lX' is not supported!\n", value_provided_by_option); // Print a kernel message, it will show up with the 'dmesg' command.
     }
+    // Check if we must execute the '--countdown' option.
     else if (option_checker.is_countdown_option) {
+        // If we specified argument is within the range to show it on the seven segment display.
         if (value_provided_by_option >= 0x0 && value_provided_by_option <= 0xF) {
-            current_counter_number = value_provided_by_option;
+            current_counter_number = value_provided_by_option; // The start number for counting.
 
+            // Count down, with an interval of one second.
             for (; current_counter_number >= 0x0; current_counter_number--) {
-                write_byte_shift_register(current_counter_number);
-                ssleep(1);
+                write_byte_shift_register(current_counter_number); // Show the number on the seven segment display.
+                ssleep(1); // Sleep one second (this is not busy waiting).
             }
         }
         else
             printk(KERN_NOTICE "[AALDERING DRIVER - MESSAGE] - Argument provided with option '--countdown' with value '0x%lX' is not supported!\n", value_provided_by_option); // Print a kernel message, it will show up with the 'dmesg' command.
     }
+    // Check if we must execute the '--countup' option.
     else if (option_checker.is_countup_option) {
+        // If we specified argument is within the range to show it on the seven segment display.
         if (value_provided_by_option >= 0x0 && value_provided_by_option <= 0xF) {
-            current_counter_number = value_provided_by_option;
+            current_counter_number = value_provided_by_option; // The start number for counting.
 
+            // Count up, with an interval of one second.
             for (; current_counter_number <= 0xF; current_counter_number++) {
                 write_byte_shift_register(current_counter_number);
                 ssleep(1);
@@ -120,6 +137,7 @@ static ssize_t device_file_write(struct file *file_ptr, const char __user *user_
         else
             printk(KERN_NOTICE "[AALDERING DRIVER - MESSAGE] - Argument provided with option '--countup' with value '0x%lX' is not supported!\n", value_provided_by_option); // Print a kernel message, it will show up with the 'dmesg' command.
     }
+    // No option is provided that can be executed, show a 'printk' message.
     else
         printk(KERN_NOTICE "[AALDERING DRIVER - MESSAGE] - No option found to display on the seven segment display!\n"); // Print a kernel message, it will show up with the 'dmesg' command.
 
