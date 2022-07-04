@@ -64,6 +64,8 @@ static ssize_t device_file_write(struct file *file_ptr, const char __user *user_
     if (*position >= g_s_kernel_mode_size)
         return -ENOSPC; // When the user exceeded the buffer size, a value of zero can be returned. But Linux tries to write data into the buffer again. This results in an infinite operation, so return an error in this case (see page 68 of the book 'LINUX DEVICE DRIVERS').
 
+    memset(g_s_kernel_mode_buffer, 0, g_s_kernel_mode_size); // Clear the old content of the buffer, content is not needed.
+
     // Check the current position.
     if (*position + count > g_s_kernel_mode_size)
         count = g_s_kernel_mode_size - *position; // The new value of 'count'.
