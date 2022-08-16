@@ -1,5 +1,7 @@
 # Drivers
 
+_See the license of the code (copyright), please **do not** use the code for educational purposes._
+
 #### Study on operating systems, creating a device driver.
 
 This project contains a device driver developed for Linux (more specifically a Raspberry Pi). This driver has been rewritten as `AALDERING-DRIVER`, and you can control a seven segment display with it. Subsequently, a number of additional functionalities were added to make the driver more complex.
