@@ -1,3 +1,7 @@
+//
+// Copyright © 2022 Bob Aaldering
+//
+
 #include "gpio_communicator.h"
 
 #include <linux/kernel.h> // Include the 'linux/kernel' header. It contains for example an implementation of 'printk'.

@@ -1,3 +1,7 @@
+//
+// Copyright © 2022 Bob Aaldering
+//
+
 #include <linux/init.h> // Include the 'linux/init' header. It contains for instance module loading and unloading functionalities.
 #include <linux/module.h> // Include the 'linux/module' header. It contains for instance general module information.
 

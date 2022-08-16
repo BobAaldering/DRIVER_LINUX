@@ -1,3 +1,7 @@
+//
+// Copyright © 2022 Bob Aaldering
+//
+
 #ifndef DEVICE_FILE_H
 #define DEVICE_FILE_H
 

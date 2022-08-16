@@ -1,3 +1,7 @@
+//
+// Copyright © 2022 Bob Aaldering
+//
+
 #ifndef DRIVER_GPIO_COMMUNICATOR_H
 #define DRIVER_GPIO_COMMUNICATOR_H
 

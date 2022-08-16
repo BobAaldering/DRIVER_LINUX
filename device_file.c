@@ -1,3 +1,7 @@
+//
+// Copyright © 2022 Bob Aaldering
+//
+
 #include "device_file.h"
 
 #include <linux/fs.h> // Include the 'linux/fs' header. It contains functionalities for file access.
