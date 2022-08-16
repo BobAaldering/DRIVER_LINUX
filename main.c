@@ -2,6 +2,8 @@
 // Copyright © 2022 Bob Aaldering
 //
 
+// To the idea of the Apriorit driver tutorial, extended with a lot of functionalities.
+
 #include <linux/init.h> // Include the 'linux/init' header. It contains for instance module loading and unloading functionalities.
 #include <linux/module.h> // Include the 'linux/module' header. It contains for instance general module information.
 
